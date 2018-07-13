@@ -21,7 +21,8 @@ import paddle.fluid.profiler as profiler
 
 import models
 import models.resnet
-from continuous_evaluation import tracking_kpis
+
+# from continuous_evaluation import tracking_kpis
 
 
 def parse_args():
@@ -175,14 +176,14 @@ def run_benchmark(model, args):
     total_train_time = 0.0
     total_iters = 0
 
-    train_acc_kpi = None
-    for kpi in tracking_kpis:
-        if kpi.name == '%s_%s_train_acc' % (args.data_set, args.batch_size):
-            train_acc_kpi = kpi
-    train_speed_kpi = None
-    for kpi in tracking_kpis:
-        if kpi.name == '%s_%s_train_speed' % (args.data_set, args.batch_size):
-            train_speed_kpi = kpi
+    # train_acc_kpi = None
+    # for kpi in tracking_kpis:
+    #     if kpi.name == '%s_%s_train_acc' % (args.data_set, args.batch_size):
+    #         train_acc_kpi = kpi
+    # train_speed_kpi = None
+    # for kpi in tracking_kpis:
+    #     if kpi.name == '%s_%s_train_speed' % (args.data_set, args.batch_size):
+    #         train_speed_kpi = kpi
 
     for pass_id in range(args.pass_num):
         every_pass_loss = []
@@ -222,30 +223,30 @@ def run_benchmark(model, args):
             % (pass_id, np.mean(every_pass_loss), pass_train_acc,
                pass_test_acc, pass_duration))
 
-    if pass_id == args.pass_num - 1 and args.data_set == 'cifar10':
-        train_acc_kpi.add_record(np.array(pass_train_acc, dtype='float32'))
-        train_acc_kpi.persist()
+    # if pass_id == args.pass_num - 1 and args.data_set == 'cifar10':
+    #     train_acc_kpi.add_record(np.array(pass_train_acc, dtype='float32'))
+    #     train_acc_kpi.persist()
 
-    if total_train_time > 0.0 and iter != args.skip_batch_num:
-        examples_per_sec = im_num / total_train_time
-        sec_per_batch = total_train_time / \
-            (iter * args.pass_num - args.skip_batch_num)
-        train_speed_kpi.add_record(np.array(examples_per_sec, dtype='float32'))
+    # if total_train_time > 0.0 and iter != args.skip_batch_num:
+    #     examples_per_sec = im_num / total_train_time
+    #     sec_per_batch = total_train_time / \
+    #         (iter * args.pass_num - args.skip_batch_num)
+    #     train_speed_kpi.add_record(np.array(examples_per_sec, dtype='float32'))
 
-    train_speed_kpi.persist()
+    # train_speed_kpi.persist()
 
     print('\nTotal examples: %d, total time: %.5f' %
           (im_num, total_train_time))
     print('%.5f examples/sec, %.5f sec/batch \n' %
           (examples_per_sec, sec_per_batch))
 
-    if args.use_cprof:
-        pr.disable()
-        s = StringIO.StringIO()
-        sortby = 'cumulative'
-        ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
-        ps.print_stats()
-        print(s.getvalue())
+    # if args.use_cprof:
+    #     pr.disable()
+    #     s = StringIO.StringIO()
+    #     sortby = 'cumulative'
+    #     ps = pstats.Stats(pr, stream=s).sort_stats(sortby)
+    #     ps.print_stats()
+    #     print(s.getvalue())
 
 
 def collect_gpu_memory_data(alive):
@@ -265,14 +266,13 @@ def collect_gpu_memory_data(alive):
     p.kill()
 
 
-def save_gpu_data(mem_list):
-    gpu_memory_kpi = None
-    for kpi in tracking_kpis:
-        if kpi.name == '%s_%s_gpu_memory' % (args.data_set, args.batch_size):
-            gpu_memory_kpi = kpi
-    gpu_memory_kpi.add_record(max(mem_list))
-    gpu_memory_kpi.persist()
-
+# def save_gpu_data(mem_list):
+#     gpu_memory_kpi = None
+#     for kpi in tracking_kpis:
+#         if kpi.name == '%s_%s_gpu_memory' % (args.data_set, args.batch_size):
+#             gpu_memory_kpi = kpi
+#     gpu_memory_kpi.add_record(max(mem_list))
+#     gpu_memory_kpi.persist()
 
 if __name__ == '__main__':
     model_map = {
@@ -289,11 +289,11 @@ if __name__ == '__main__':
     if args.data_format == 'NHWC':
         raise ValueError('Only support NCHW data_format now.')
 
-    if args.device == 'GPU':
-        collect_memory_thread = threading.Thread(
-            target=collect_gpu_memory_data, args=(is_alive, ))
-        collect_memory_thread.setDaemon(True)
-        collect_memory_thread.start()
+    # if args.device == 'GPU':
+    #     collect_memory_thread = threading.Thread(
+    #         target=collect_gpu_memory_data, args=(is_alive, ))
+    #     collect_memory_thread.setDaemon(True)
+    #     collect_memory_thread.start()
 
     run_benchmark(model_map[args.model], args)
 
