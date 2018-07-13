@@ -124,7 +124,7 @@ def run_benchmark(model, args):
 
     input = fluid.layers.data(name='data', shape=dshape, dtype='float32')
     label = fluid.layers.data(name='label', shape=[1], dtype='int64')
-    predict = model(input, class_dim)
+    predict = model(args, input, class_dim)
     cost = fluid.layers.cross_entropy(input=predict, label=label)
     avg_cost = fluid.layers.mean(x=cost)
 
